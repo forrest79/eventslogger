@@ -32,6 +32,11 @@ namespace EventsLogger
         protected string logDirectory = "";
 
         /// <summary>
+        /// Time for last event.
+        /// </summary>
+        protected DateTime lastEventTime;
+
+        /// <summary>
         /// Initialize service.
         /// </summary>
         public EventsLoggerService()
@@ -182,7 +187,16 @@ namespace EventsLogger
                 return;
             }
 
-            message = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + ": " + message;
+            DateTime eventTime = DateTime.Now;
+
+            message = eventTime.ToString("yyyy-MM-dd HH:mm:ss") + ": " + message;
+            if (lastEventTime != DateTime.MinValue)
+            {
+                TimeSpan timeDiff = eventTime - lastEventTime;
+                message += " (from last event: " + timeDiff.ToString() + ")";
+            }
+
+            lastEventTime = eventTime;
 
             string path = logDirectory + "\\" + DateTime.Now.ToString("yyyy-MM-dd") + ".log";
 
