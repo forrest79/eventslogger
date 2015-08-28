@@ -77,7 +77,7 @@ namespace EventsLogger
         /// <param name="e"></param>
         private void btnOpen_Click(object sender, EventArgs e)
         {
-            if (CheckDirectory())
+            if ((txtDirectory.Text.Length > 0) && CheckDirectory())
             {
                 Process.Start(txtDirectory.Text);
             }
