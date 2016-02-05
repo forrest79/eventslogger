@@ -1,4 +1,4 @@
-EventsLogger © Jakub Trmota, 2015 (http://forrest79.net)
+EventsLogger © Jakub Trmota, 2016 (http://forrest79.net)
 
 
 Log all Windows system events to text file by days.
@@ -11,6 +11,7 @@ Run eventslogger.exe with administrator privileges to install/uninstall/start/st
 
 HISTORY
 =======
+1.0.3 [2016-02-05] - Update log format
 1.0.2 [2015-08-28] - Small bugfix
 1.0.1 [2014-03-28] - Make time diff for events
 1.0.0 [2013-08-06] - First public version

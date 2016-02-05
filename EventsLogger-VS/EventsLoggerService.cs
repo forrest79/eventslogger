@@ -22,6 +22,11 @@ namespace EventsLogger
         public const string APP = "EventsLogger";
 
         /// <summary>
+        /// Service name.
+        /// </summary>
+        protected const int LINE_WIDTH = 65;
+
+        /// <summary>
         /// Settings.
         /// </summary>
         protected Settings settings;
@@ -98,7 +103,7 @@ namespace EventsLogger
         /// </summary>
         protected override void OnShutdown()
         {
-            WriteToLog("COMPUTER SHUTDOWN");
+            WriteToLog("COMPUTER SHUTDOWN", true);
         }
 
         /// <summary>
@@ -118,6 +123,7 @@ namespace EventsLogger
         protected override bool OnPowerEvent(PowerBroadcastStatus powerStatus)
         {
             string eventInfo;
+            bool highlight = false;
 
             switch (powerStatus)
             {
@@ -155,6 +161,7 @@ namespace EventsLogger
 
                 case PowerBroadcastStatus.Suspend :
                     eventInfo = "Suspend";
+                    highlight = true;
                     break;
 
                 default :
@@ -163,7 +170,7 @@ namespace EventsLogger
 
             }
 
-            WriteToLog("POWER EVENT [" + eventInfo + "]");
+            WriteToLog("POWER EVENT [" + eventInfo + "]", highlight);
             return true;
         }
 
@@ -173,7 +180,7 @@ namespace EventsLogger
         /// <param name="changeDescription"></param>
         protected override void OnSessionChange(SessionChangeDescription changeDescription)
         {
-            WriteToLog("SESSION CHANGE [" + changeDescription.Reason.ToString() + " #" + changeDescription.SessionId.ToString() + "]");
+            WriteToLog("SESSION CHANGE [" + changeDescription.Reason.ToString() + ((changeDescription.SessionId > 1) ? (" #" + changeDescription.SessionId.ToString()) : "") + "]", changeDescription.Reason == SessionChangeReason.SessionUnlock);
         }
 
         /// <summary>
@@ -181,6 +188,16 @@ namespace EventsLogger
         /// </summary>
         /// <param name="message">Message to log.</param>
         protected void WriteToLog(string message)
+        {
+            WriteToLog(message, false);
+        }
+
+        /// <summary>
+        /// Write to text log file.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        /// <param name="highlightPreviousTime">Message to log.</param>
+        protected void WriteToLog(string message, bool highlightPreviousTime)
         {
             if (logDirectory.Length == 0)
             {
@@ -193,7 +210,7 @@ namespace EventsLogger
             if (lastEventTime != DateTime.MinValue)
             {
                 TimeSpan timeDiff = eventTime - lastEventTime;
-                message += " (from last event: " + timeDiff.ToString() + ")";
+                message += (new String(' ', ((LINE_WIDTH - message.Length) > 0) ? (LINE_WIDTH - message.Length) : 0)) + (highlightPreviousTime ? "=" : "-") + "> from last event: " + timeDiff.ToString(((timeDiff.Days > 0) ? @"d\." : "") + @"hh\:mm\:ss");
             }
 
             lastEventTime = eventTime;
