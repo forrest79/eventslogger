@@ -24,22 +24,27 @@ namespace EventsLogger
         /// <summary>
         /// Service name.
         /// </summary>
-        protected const int LINE_WIDTH = 65;
+        private const int LINE_WIDTH = 65;
 
         /// <summary>
         /// Settings.
         /// </summary>
-        protected Settings settings;
+        private Settings settings;
 
         /// <summary>
         /// Directory with logs.
         /// </summary>
-        protected string logDirectory = "";
+        private string logDirectory = "";
+
+        /// <summary>
+        /// Directory with logs.
+        /// </summary>
+        private int roundMinutes = 0;
 
         /// <summary>
         /// Time for last event.
         /// </summary>
-        protected DateTime lastEventTime;
+        private DateTime lastEventTime;
 
         /// <summary>
         /// Initialize service.
@@ -62,13 +67,14 @@ namespace EventsLogger
         {
             settings = new Settings();
             logDirectory = settings.GetLogDirectory();
+            roundMinutes = settings.GetRoundMinutes();
 
             if (logDirectory.Length == 0)
             {
                 WriteToEventLog("Can't log events - directory for logger is not set.", EventLogEntryType.Error);
             }
 
-            WriteToLog("EVENTS LOGGER START");
+            WriteToLog("> events-logger-start");
         }
 
         /// <summary>
@@ -76,7 +82,7 @@ namespace EventsLogger
         /// </summary>
         protected override void OnStop()
         {
-            WriteToLog("EVENTS LOGGER STOP");
+            WriteToLog("> events-logger-stop");
 
             settings = null;
             logDirectory = "";
@@ -87,7 +93,7 @@ namespace EventsLogger
         /// </summary>
         protected override void OnPause()
         {
-            WriteToLog("EVENTS LOGGER PAUSED");
+            WriteToLog("> events-logger-pause");
         }
 
         /// <summary>
@@ -95,7 +101,7 @@ namespace EventsLogger
         /// </summary>
         protected override void OnContinue()
         {
-            WriteToLog("EVENTS LOGGER CONTINUE");
+            WriteToLog("> event-logger-continue");
         }
 
         /// <summary>
@@ -103,7 +109,7 @@ namespace EventsLogger
         /// </summary>
         protected override void OnShutdown()
         {
-            WriteToLog("COMPUTER SHUTDOWN", true);
+            WriteToLog("# COMPUTER SHUTDOWN", true);
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace EventsLogger
         /// <param name="command"></param>
         protected override void OnCustomCommand(int command)
         {
-            WriteToLog("CUSTOM COMMAND [#" + command.ToString() + "]");
+            WriteToLog("* " + command.ToString() + " (custom-command)");
         }
 
         /// <summary>
@@ -156,11 +162,11 @@ namespace EventsLogger
                     break;
 
                 case PowerBroadcastStatus.ResumeSuspend :
-                    eventInfo = "Suspend resume";
+                    eventInfo = "SUSPEND RESUME";
                     break;
 
                 case PowerBroadcastStatus.Suspend :
-                    eventInfo = "Suspend";
+                    eventInfo = "SUSPEND";
                     highlight = true;
                     break;
 
@@ -170,7 +176,7 @@ namespace EventsLogger
 
             }
 
-            WriteToLog("POWER EVENT [" + eventInfo + "]", highlight);
+            WriteToLog("# " + eventInfo + " (power-event)", highlight);
             return true;
         }
 
@@ -180,14 +186,62 @@ namespace EventsLogger
         /// <param name="changeDescription"></param>
         protected override void OnSessionChange(SessionChangeDescription changeDescription)
         {
-            WriteToLog("SESSION CHANGE [" + changeDescription.Reason.ToString() + ((changeDescription.SessionId > 1) ? (" #" + changeDescription.SessionId.ToString()) : "") + "]", changeDescription.Reason == SessionChangeReason.SessionUnlock);
+            string eventInfo;
+            bool highlight = false;
+
+            switch (changeDescription.Reason)
+            {
+                case SessionChangeReason.ConsoleConnect:
+                    eventInfo = "Console connect";
+                    break;
+
+                case SessionChangeReason.ConsoleDisconnect:
+                    eventInfo = "Console disconnect";
+                    break;
+
+                case SessionChangeReason.RemoteConnect:
+                    eventInfo = "Remote connect";
+                    break;
+
+                case SessionChangeReason.RemoteDisconnect:
+                    eventInfo = "Remote disconnect";
+                    break;
+
+                case SessionChangeReason.SessionLock:
+                    eventInfo = "LOCK COMPUTER";
+                    break;
+
+                case SessionChangeReason.SessionLogoff:
+                    eventInfo = "Logoff";
+                    break;
+
+                case SessionChangeReason.SessionLogon:
+                    eventInfo = "Logon";
+                    break;
+
+                case SessionChangeReason.SessionRemoteControl:
+                    eventInfo = "Remote control";
+                    break;
+
+                case SessionChangeReason.SessionUnlock:
+                    eventInfo = "UNLOCK COMPUTER";
+                    highlight = true;
+                    break;
+
+                default:
+                    eventInfo = "N/A";
+                    break;
+
+            }
+
+            WriteToLog("# " + eventInfo + " (session-change" + ((changeDescription.SessionId > 1) ? ("#" + changeDescription.SessionId.ToString()) : "") + ")", highlight);
         }
 
         /// <summary>
         /// Write to text log file.
         /// </summary>
         /// <param name="message">Message to log.</param>
-        protected void WriteToLog(string message)
+        private void WriteToLog(string message)
         {
             WriteToLog(message, false);
         }
@@ -197,7 +251,7 @@ namespace EventsLogger
         /// </summary>
         /// <param name="message">Message to log.</param>
         /// <param name="highlightPreviousTime">Message to log.</param>
-        protected void WriteToLog(string message, bool highlightPreviousTime)
+        private void WriteToLog(string message, bool highlightPreviousTime)
         {
             if (logDirectory.Length == 0)
             {
@@ -210,7 +264,17 @@ namespace EventsLogger
             if (lastEventTime != DateTime.MinValue)
             {
                 TimeSpan timeDiff = eventTime - lastEventTime;
-                message += (new String(' ', ((LINE_WIDTH - message.Length) > 0) ? (LINE_WIDTH - message.Length) : 0)) + (highlightPreviousTime ? "=" : "-") + "> from last event: " + timeDiff.ToString(((timeDiff.Days > 0) ? @"d\." : "") + @"hh\:mm\:ss");
+                message += (new String(' ', ((LINE_WIDTH - message.Length) > 0) ? (LINE_WIDTH - message.Length) : 0)) + (highlightPreviousTime ? "=" : "-") + "> from last: " + timeDiff.ToString(((timeDiff.Days > 0) ? @"d\." : "") + @"hh\:mm\:ss");
+                if (highlightPreviousTime && (roundMinutes > 0))
+                {
+                    DateTime roundLastEventTime = RoundDateTimeUp(lastEventTime, TimeSpan.FromMinutes(roundMinutes));
+                    DateTime roundEventTime = RoundDateTimeDown(eventTime, TimeSpan.FromMinutes(roundMinutes));
+                    if (roundEventTime > roundLastEventTime)
+                    {
+                        TimeSpan roundTimeDiff = roundEventTime - roundLastEventTime;
+                        message += " (rounded to " + roundMinutes + " minutes: " + roundTimeDiff.ToString(((roundTimeDiff.Days > 0) ? @"d\." : "") + @"hh\:mm\:ss") + ")";
+                    }
+                }
             }
 
             lastEventTime = eventTime;
@@ -250,7 +314,7 @@ namespace EventsLogger
         /// </summary>
         /// <param name="message">Message to log.</param>
         /// <param name="type">Message type.</param>
-        protected void WriteToEventLog(string message, EventLogEntryType type)
+        private void WriteToEventLog(string message, EventLogEntryType type)
         {
             if (!EventLog.SourceExists(APP))
             {
@@ -260,6 +324,28 @@ namespace EventsLogger
             EventLog.WriteEntry(APP, message, type);
         }
 
+        /// <summary>
+        /// Round date time dt up to d.
+        /// </summary>
+        /// <param name="dt">Date time to round up.</param>
+        /// <param name="d">Round to.</param>
+        /// <returns></returns>
+        private DateTime RoundDateTimeUp(DateTime dt, TimeSpan d)
+        {
+            return new DateTime(((dt.Ticks / d.Ticks) + 1) * d.Ticks);
+        }
+
+        /// <summary>
+        /// Round date time dt down to d.
+        /// </summary>
+        /// <param name="dt">Date time to round down.</param>
+        /// <param name="d">Round to.</param>
+        /// <returns></returns>
+        private DateTime RoundDateTimeDown(DateTime dt, TimeSpan d)
+        {
+            return new DateTime((dt.Ticks / d.Ticks) * d.Ticks);
+        }
+        
         /// <summary>
         /// Check if events logger service is already installed.
         /// </summary>
@@ -304,6 +390,10 @@ namespace EventsLogger
         /// </summary>
         public static void ServiceUninstall()
         {
+            if (ServiceIsRunning())
+            {
+                ServiceStop();
+            }
             ManagedInstallerClass.InstallHelper(new string[] { "/u", Assembly.GetExecutingAssembly().Location });
         }
 
@@ -364,7 +454,7 @@ namespace EventsLogger
         /// Return events logger service, if installed.
         /// </summary>
         /// <returns>Events logger service.</returns>
-        protected static ServiceController GetService()
+        private static ServiceController GetService()
         {
             foreach (ServiceController sc in ServiceController.GetServices())
             {

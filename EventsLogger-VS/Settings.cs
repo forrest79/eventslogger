@@ -13,22 +13,27 @@ namespace EventsLogger
         /// <summary>
         /// Registry key.
         /// </summary>
-        protected const string KEY = "SOFTWARE\\Forrest79.net\\" + EventsLoggerService.APP;
+        private const string KEY = "SOFTWARE\\Forrest79.net\\" + EventsLoggerService.APP;
 
         /// <summary>
         /// Is settings loaded.
         /// </summary>
-        protected bool isLoaded = false;
+        private bool isLoaded = false;
 
         /// <summary>
         /// Directory with logs.
         /// </summary>
-        protected string logDirectory = "";
+        private string logDirectory = "";
+
+        /// <summary>
+        /// Round time diff to minutes.
+        /// </summary>
+        private int roundMinutes = 0;
 
         /// <summary>
         /// Load settings if neccesary
         /// </summary>
-        protected void Load()
+        private void Load()
         {
             if (isLoaded)
             {
@@ -46,6 +51,15 @@ namespace EventsLogger
             {
                 char[] slash = {'\\'};
                 logDirectory = ((string)rk.GetValue("logDirectory")).TrimEnd(slash);
+
+                int tempRoundMinutes;
+                if (Int32.TryParse(((string)rk.GetValue("roundMinutes")).TrimEnd(slash), out tempRoundMinutes))
+                {
+                    if ((tempRoundMinutes >= 0) && (tempRoundMinutes <= 60))
+                    {
+                        roundMinutes = tempRoundMinutes;
+                    }
+                }
             }
             catch
             {
@@ -55,10 +69,11 @@ namespace EventsLogger
         /// <summary>
         /// Save settings to registry.
         /// </summary>
-        protected void Save()
+        private void Save()
         {
             RegistryKey rk = Registry.LocalMachine.CreateSubKey(KEY);
             rk.SetValue("logDirectory", logDirectory);
+            rk.SetValue("roundMinutes", roundMinutes.ToString());
         }
 
         /// <summary>
@@ -76,10 +91,35 @@ namespace EventsLogger
         /// Set directory for logs.
         /// </summary>
         /// <param name="logDirectory">Logs directory.</param>
-        /// <returns>Settigns.</returns>
+        /// <returns>Settings.</returns>
         public Settings SetLogDirectory(string logDirectory)
         {
             this.logDirectory = logDirectory;
+
+            Save();
+
+            return this;
+        }
+
+        /// <summary>
+        /// Get round time diff to minutes.
+        /// </summary>
+        /// <returns>Round minutes.</returns>
+        public int GetRoundMinutes()
+        {
+            Load();
+
+            return roundMinutes;
+        }
+
+        /// <summary>
+        /// Set round time diff to minutes.
+        /// </summary>
+        /// <param name="logDirectory">Round time diff to minutes.</param>
+        /// <returns>Settings.</returns>
+        public Settings SetRoundMinutes(int roundMinutes)
+        {
+            this.roundMinutes = roundMinutes;
 
             Save();
 

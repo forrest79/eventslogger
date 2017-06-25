@@ -19,12 +19,12 @@ namespace EventsLogger
         /// <summary>
         /// Service process installer.
         /// </summary>
-        protected ServiceProcessInstaller process;
+        private ServiceProcessInstaller process;
 
         /// <summary>
         /// Service installer.
         /// </summary>
-        protected ServiceInstaller service;
+        private ServiceInstaller service;
 
         /// <summary>
         /// Initialize installer.

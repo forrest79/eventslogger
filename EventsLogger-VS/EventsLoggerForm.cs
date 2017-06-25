@@ -20,7 +20,7 @@ namespace EventsLogger
         /// <summary>
         /// Settings.
         /// </summary>
-        protected Settings settings;
+        private Settings settings;
 
         /// <summary>
         /// Initialize form.
@@ -39,6 +39,7 @@ namespace EventsLogger
         private void EventsLoggerForm_Load(object sender, EventArgs e)
         {
             txtDirectory.Text = settings.GetLogDirectory();
+            txtRoundMinutes.Text = settings.GetRoundMinutes().ToString();
             CheckStatus();
         }
 
@@ -150,15 +151,20 @@ namespace EventsLogger
         /// <param name="e"></param>
         private void EventsLoggerForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!CheckDirectory())
+            if (!CheckDirectory() || !CheckRoundMinutes())
             {
                 e.Cancel = true;
             }
             else
             {
-                if (settings.GetLogDirectory() != txtDirectory.Text)
+                if ((settings.GetLogDirectory() != txtDirectory.Text) || (settings.GetRoundMinutes().ToString() != txtRoundMinutes.Text))
                 {
                     settings.SetLogDirectory(txtDirectory.Text);
+                    int tempRoundMinutes;
+                    if (Int32.TryParse(txtRoundMinutes.Text, out tempRoundMinutes))
+                    {
+                        settings.SetRoundMinutes(tempRoundMinutes);
+                    }
 
                     if (EventsLoggerService.ServiceIsRunning())
                     {
@@ -174,7 +180,7 @@ namespace EventsLogger
         /// Check if directory exists and show error if not.
         /// </summary>
         /// <returns>True if directory exists, false otherwise.</returns>
-        protected bool CheckDirectory()
+        private bool CheckDirectory()
         {
             if ((txtDirectory.Text.Length > 0) && !Directory.Exists(txtDirectory.Text))
             {
@@ -186,9 +192,33 @@ namespace EventsLogger
         }
 
         /// <summary>
+        /// Check if directory exists and show error if not.
+        /// </summary>
+        /// <returns>True if directory exists, false otherwise.</returns>
+        private bool CheckRoundMinutes()
+        {
+            if (txtRoundMinutes.Text.Length > 0)
+            {
+                int tempRoundMinutes;
+                if (Int32.TryParse(txtRoundMinutes.Text, out tempRoundMinutes))
+                {
+                    if ((tempRoundMinutes >= 0) && (tempRoundMinutes <= 60))
+                    {
+                        return true;
+                    }
+                }
+
+                MessageBox.Show("Round time diff to minutes '" + txtRoundMinutes.Text + "' must be between 0 and 60", "Bad round time diff to minutes", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Check service status and enable buttons.
         /// </summary>
-        protected void CheckStatus()
+        private void CheckStatus()
         {
             if (EventsLoggerService.ServiceIsInstalled())
             {

@@ -41,6 +41,9 @@
             this.lblDirectory = new System.Windows.Forms.Label();
             this.btnClose = new System.Windows.Forms.Button();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.lblRound = new System.Windows.Forms.Label();
+            this.txtRoundMinutes = new System.Windows.Forms.TextBox();
+            this.lblRoundMinutes = new System.Windows.Forms.Label();
             this.gbService.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -96,9 +99,9 @@
             // 
             // txtDirectory
             // 
-            this.txtDirectory.Location = new System.Drawing.Point(64, 11);
+            this.txtDirectory.Location = new System.Drawing.Point(71, 11);
             this.txtDirectory.Name = "txtDirectory";
-            this.txtDirectory.Size = new System.Drawing.Size(393, 20);
+            this.txtDirectory.Size = new System.Drawing.Size(386, 20);
             this.txtDirectory.TabIndex = 1;
             // 
             // btnBrowse
@@ -117,7 +120,7 @@
             this.gbService.Controls.Add(this.btnUninstall);
             this.gbService.Controls.Add(this.btnStart);
             this.gbService.Controls.Add(this.btnStop);
-            this.gbService.Location = new System.Drawing.Point(10, 40);
+            this.gbService.Location = new System.Drawing.Point(10, 77);
             this.gbService.Name = "gbService";
             this.gbService.Size = new System.Drawing.Size(289, 56);
             this.gbService.TabIndex = 7;
@@ -136,7 +139,7 @@
             // btnClose
             // 
             this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnClose.Location = new System.Drawing.Point(469, 73);
+            this.btnClose.Location = new System.Drawing.Point(469, 110);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 0;
@@ -150,11 +153,39 @@
             this.timer.Interval = 1000;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
+            // lblRound
+            // 
+            this.lblRound.AutoSize = true;
+            this.lblRound.Location = new System.Drawing.Point(12, 40);
+            this.lblRound.Name = "lblRound";
+            this.lblRound.Size = new System.Drawing.Size(93, 13);
+            this.lblRound.TabIndex = 10;
+            this.lblRound.Text = "Round time diff to:";
+            // 
+            // txtRoundMinutes
+            // 
+            this.txtRoundMinutes.Location = new System.Drawing.Point(111, 37);
+            this.txtRoundMinutes.Name = "txtRoundMinutes";
+            this.txtRoundMinutes.Size = new System.Drawing.Size(31, 20);
+            this.txtRoundMinutes.TabIndex = 9;
+            // 
+            // lblRoundMinutes
+            // 
+            this.lblRoundMinutes.AutoSize = true;
+            this.lblRoundMinutes.Location = new System.Drawing.Point(148, 40);
+            this.lblRoundMinutes.Name = "lblRoundMinutes";
+            this.lblRoundMinutes.Size = new System.Drawing.Size(43, 13);
+            this.lblRoundMinutes.TabIndex = 11;
+            this.lblRoundMinutes.Text = "minutes";
+            // 
             // EventsLoggerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(550, 102);
+            this.ClientSize = new System.Drawing.Size(550, 141);
+            this.Controls.Add(this.lblRoundMinutes);
+            this.Controls.Add(this.lblRound);
+            this.Controls.Add(this.txtRoundMinutes);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.lblDirectory);
             this.Controls.Add(this.gbService);
@@ -187,5 +218,8 @@
         private System.Windows.Forms.Label lblDirectory;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.Label lblRound;
+        private System.Windows.Forms.TextBox txtRoundMinutes;
+        private System.Windows.Forms.Label lblRoundMinutes;
     }
 }
