@@ -1,4 +1,4 @@
-EventsLogger © Jakub Trmota, 2017 (http://forrest79.net)
+EventsLogger Â© Jakub Trmota, 2017 (https://forrest79.net)
 
 
 Log all Windows system events to text file by days.
@@ -25,7 +25,7 @@ You need .NET Framework 4 to run this application (http://www.microsoft.com/en-u
 
 LICENSE
 =======
-EventsLogger is distributed under BSD license. See license.txt.
+EventsLogger is distributed under New BSD license. See license.txt.
 
 
 https://github.com/forrest79/eventslogger
