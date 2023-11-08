@@ -13,7 +13,7 @@ namespace EventsLogger
         /// <summary>
         /// Registry key.
         /// </summary>
-        private const string KEY = "SOFTWARE\\Forrest79.net\\" + EventsLoggerService.APP;
+        private const string KEY = "SOFTWARE\\Forrest79\\" + EventsLoggerService.APP;
 
         /// <summary>
         /// Is settings loaded.

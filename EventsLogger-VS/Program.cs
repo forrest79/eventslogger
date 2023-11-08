@@ -34,9 +34,9 @@ namespace EventsLogger
             {
                 ServiceBase[] ServicesToRun;
                 ServicesToRun = new ServiceBase[] 
-    			{ 
-	    			new EventsLoggerService() 
-		    	};
+                { 
+                    new EventsLoggerService() 
+                };
                 ServiceBase.Run(ServicesToRun);
             }
             else
